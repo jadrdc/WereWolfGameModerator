@@ -6,7 +6,7 @@ This project is destiny to Android Operating System.
 
 
 ## Built With
-[ButterKnife](http://jakewharton.github.io/butterknife/) Field and method binding for Android views which uses annotation processing to generate boilerplate code for you.
+*[ButterKnife](http://jakewharton.github.io/butterknife/) Field and method binding for Android views which uses annotation processing to generate boilerplate code for you.
 
 
 
