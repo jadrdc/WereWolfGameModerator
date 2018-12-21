@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "104577148857",
+    "firebase_url": "https://werewolfmoderator-eb757.firebaseio.com",
+    "project_id": "werewolfmoderator-eb757",
+    "storage_bucket": "werewolfmoderator-eb757.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:104577148857:android:014f22fdc6b8ff1f",
+        "android_client_info": {
+          "package_name": "agustinreinosowerewolf.com.werewolfgamemoderator"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "104577148857-8dubu11bm96g78a2iusgoghmpcgbog38.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCTu326aQVMp4okJUzXkiWyX-HFczWMbxk"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
