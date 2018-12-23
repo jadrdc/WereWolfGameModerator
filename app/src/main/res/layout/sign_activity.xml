@@ -6,13 +6,20 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp"
-    tools:context=".SignActivity">
+    tools:context=".views.SignActivity">
 
     <ImageView
         android:layout_width="wrap_content"
-        android:layout_height="500dp"
+        android:layout_height="390dp"
         android:layout_gravity="center_horizontal"
         android:src="@drawable/sign" />
+
+    <ProgressBar
+        android:id="@+id/progrbar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="invisible" />
 
     <com.google.android.gms.common.SignInButton
         android:id="@+id/sign_in_button"

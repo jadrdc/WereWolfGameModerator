@@ -12,6 +12,9 @@ import agustinreinosowerewolf.com.werewolfgamemoderator.googleservices.GoogleAut
 public class UserViewModel extends AndroidViewModel {
     private LiveData<GoogleAuthManager> mAuthManager;
 
+
+    private MutableLiveData<Boolean> isLoading;
+
     public UserViewModel(@NonNull Application application) {
         super(application);
     }
@@ -25,8 +28,18 @@ public class UserViewModel extends AndroidViewModel {
         return mAuthManager;
     }
 
+
     public void sign() {
         mAuthManager.getValue().authGoogle(getApplication());
+    }
+    public MutableLiveData<Boolean> getIsLoading() {
+
+        if(isLoading==null)
+        {
+            isLoading= new MutableLiveData<>();
+            ((MutableLiveData<Boolean>) isLoading).setValue(false);
+        }
+        return isLoading;
     }
 
 
