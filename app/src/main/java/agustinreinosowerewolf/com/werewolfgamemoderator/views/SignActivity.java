@@ -74,7 +74,8 @@ public class SignActivity extends AppCompatActivity {
             mUserViewModel.getIsLoading().setValue(false);
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             if (result.isSuccess()) {
-                Toast.makeText(getApplicationContext(), "SE HA LOGUEADO", Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(this, MainActivity.class);
+                startActivity(intent);
             } else {
                 Toast.makeText(getApplicationContext(), "No se ha podido Iniciar Sesion", Toast.LENGTH_LONG).show();
 

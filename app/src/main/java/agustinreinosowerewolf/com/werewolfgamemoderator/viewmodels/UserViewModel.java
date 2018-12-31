@@ -32,14 +32,19 @@ public class UserViewModel extends AndroidViewModel {
     public void sign() {
         mAuthManager.getValue().authGoogle(getApplication());
     }
+
     public MutableLiveData<Boolean> getIsLoading() {
 
-        if(isLoading==null)
-        {
-            isLoading= new MutableLiveData<>();
+        if (isLoading == null) {
+            isLoading = new MutableLiveData<>();
             ((MutableLiveData<Boolean>) isLoading).setValue(false);
         }
         return isLoading;
+    }
+
+    public void signOut() {
+        mAuthManager.getValue().mGoogleapiClient.signOut();
+
     }
 
 
