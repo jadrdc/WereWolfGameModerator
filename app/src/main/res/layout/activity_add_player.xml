@@ -6,5 +6,9 @@
     android:layout_height="match_parent"
     tools:context=".views.AddPlayerActivity">
 
-
+    <Button android:layout_gravity="bottom"
+        android:id="@+id/btn_save"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Save" />
 </LinearLayout>
