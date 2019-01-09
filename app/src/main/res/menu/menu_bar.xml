@@ -2,10 +2,18 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/add_chracter"
+        android:id="@+id/btn_set_game"
         android:icon="@drawable/add"
-        android:title="Add"
+        android:title="Start"
         app:showAsAction="ifRoom"></item>
+
+    <item
+        android:id="@+id/btn_play_game"
+        android:icon="@drawable/play"
+        android:title="Play"
+        app:showAsAction="ifRoom"></item>
+
+
     <item
 
         android:id="@+id/logout"
