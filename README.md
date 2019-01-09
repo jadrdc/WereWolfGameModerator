@@ -7,7 +7,8 @@ This project is destiny to Android Operating System.
 
 ## Built With
 * **[ButterKnife](http://jakewharton.github.io/butterknife/)** :  Field and method binding for Android views which uses annotation processing to generate boilerplate code for you.
-* **[Google Play Games Services](https://developers.google.com/games/services/android/quickstart)** :  Google Services for adding a RealTime Experience and handler peer to peer interactions..
+* **[Google Play Games Services](https://developers.google.com/games/services/android/quickstart)** :  Google Services for adding a RealTime Experience and handler peer to peer interactions.
+* **[Android Architecture Components](https://developer.android.com/topic/libraries/architecture/)** :  Google libraries for developing robust apps based on the MVVM Architeture Pattern.
 
 
 
