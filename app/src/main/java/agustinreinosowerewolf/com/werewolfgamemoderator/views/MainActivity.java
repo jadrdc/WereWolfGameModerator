@@ -13,6 +13,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -21,6 +22,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.games.Game;
 import com.google.android.gms.games.Games;
+import com.google.android.gms.games.multiplayer.Invitation;
 import com.google.android.gms.games.multiplayer.Multiplayer;
 import com.google.android.gms.games.multiplayer.realtime.OnRealTimeMessageReceivedListener;
 import com.google.android.gms.games.multiplayer.realtime.Room;
@@ -41,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
 
     private UserViewModel mUserViewModel;
     private int SIGN_GAMING = 123;
+    private int JOIN_GAME = 12345;
     private int START_GAME = 1234;
     private GoogleSignInClient mGoogleGameSignIn;
 
@@ -77,7 +80,9 @@ public class MainActivity extends AppCompatActivity {
                 startActivityForResult(mGoogleGameSignIn.getSignInIntent(), SIGN_GAMING);
                 break;
             }
-            case R.id.btn_play_game:{
+            case R.id.btn_play_game: {
+                mGoogleGameSignIn = mUserViewModel.getmAuthManager().getValue().authGame(this);
+                startActivityForResult(mGoogleGameSignIn.getSignInIntent(), JOIN_GAME);
 
                 break;
             }
@@ -90,11 +95,15 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-        if (requestCode == SIGN_GAMING) {
+        if (requestCode == SIGN_GAMING || requestCode == JOIN_GAME) {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             try {
                 GoogleSignInAccount account = task.getResult(ApiException.class);
-                onConnected(account);
+                if (requestCode == SIGN_GAMING) {
+                    onCreateGameRoom(account);
+                } else {
+                    onJoinedGame(account);
+                }
             } catch (ApiException apiException) {
             }
         }
@@ -120,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void onConnected(GoogleSignInAccount googleSignInAccount) {
+    private void onCreateGameRoom(GoogleSignInAccount googleSignInAccount) {
 
         Games.getRealTimeMultiplayerClient(this, googleSignInAccount)
                 .getSelectOpponentsIntent(1, 8, true)
@@ -133,8 +142,26 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
+    private void onJoinedGame(final GoogleSignInAccount googleSignInAccount) {
+        Games.getGamesClient(this, googleSignInAccount).getActivationHint().
+                addOnSuccessListener(new OnSuccessListener<Bundle>() {
+                    @Override
+                    public void onSuccess(Bundle bundle) {
+                        Invitation invitation = bundle.getParcelable(Multiplayer.EXTRA_INVITATION);
+                        if (invitation != null) {
+                            RoomConfig.Builder builder = RoomConfig.builder(mRoomUpdateCallback)
+                                    .setInvitationIdToAccept(invitation.getInvitationId());
+                            Games.getRealTimeMultiplayerClient(getApplicationContext(),
+                                    googleSignInAccount)
+                                    .join(builder.build());
+                            // prevent screen from sleeping during handshake
+                            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                        }
+                    }
+                });
+    }
 
-    private RoomUpdateCallback mRoomUpdateCallback=new RoomUpdateCallback() {
+    private RoomUpdateCallback mRoomUpdateCallback = new RoomUpdateCallback() {
         @Override
         public void onRoomCreated(int i, @Nullable Room room) {
 
