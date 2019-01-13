@@ -58,6 +58,15 @@ public class SignActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (mUserViewModel.getmAuthManager().getValue().isLogged(getApplicationContext())) {
+            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            startActivity(intent);
+        }
+    }
+
     @OnClick(R.id.sign_in_button)
     public void SignIn(View view) {
 

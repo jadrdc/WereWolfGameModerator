@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.GoogleApi;
@@ -33,6 +34,10 @@ public class GoogleAuthManager {
         return GoogleSignIn.getClient(context, GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN);
     }
 
+    public  boolean isLogged(Context context)
+    {
+        return GoogleSignIn.getLastSignedInAccount(context)==null?false:true;
+    }
     public void logOut() {
     }
 

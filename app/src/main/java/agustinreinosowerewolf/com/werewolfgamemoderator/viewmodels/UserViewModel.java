@@ -42,6 +42,10 @@ public class UserViewModel extends AndroidViewModel {
         return isLoading;
     }
 
+    public boolean   isLogged()
+    {
+        return mAuthManager.getValue().isLogged(getApplication());
+    }
     public void signOut() {
         mAuthManager.getValue().mGoogleapiClient.signOut();
 

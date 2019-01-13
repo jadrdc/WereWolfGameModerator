@@ -22,9 +22,12 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.games.Game;
 import com.google.android.gms.games.Games;
+import com.google.android.gms.games.InvitationsClient;
 import com.google.android.gms.games.multiplayer.Invitation;
+import com.google.android.gms.games.multiplayer.InvitationCallback;
 import com.google.android.gms.games.multiplayer.Multiplayer;
 import com.google.android.gms.games.multiplayer.realtime.OnRealTimeMessageReceivedListener;
+import com.google.android.gms.games.multiplayer.realtime.RealTimeMessage;
 import com.google.android.gms.games.multiplayer.realtime.Room;
 import com.google.android.gms.games.multiplayer.realtime.RoomConfig;
 import com.google.android.gms.games.multiplayer.realtime.RoomStatusUpdateCallback;
@@ -34,6 +37,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import agustinreinosowerewolf.com.werewolfgamemoderator.R;
 import agustinreinosowerewolf.com.werewolfgamemoderator.adapters.ViewPagerFragmentAdapter;
@@ -41,11 +45,13 @@ import agustinreinosowerewolf.com.werewolfgamemoderator.viewmodels.UserViewModel
 
 public class MainActivity extends AppCompatActivity {
 
+    private int RC_INVITATION_INBOX = 456;
     private UserViewModel mUserViewModel;
     private int SIGN_GAMING = 123;
     private int JOIN_GAME = 12345;
     private int START_GAME = 1234;
     private GoogleSignInClient mGoogleGameSignIn;
+    private GoogleSignInAccount mAccount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,12 +105,15 @@ public class MainActivity extends AppCompatActivity {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             try {
                 GoogleSignInAccount account = task.getResult(ApiException.class);
+                this.mAccount = account;
                 if (requestCode == SIGN_GAMING) {
                     onCreateGameRoom(account);
                 } else {
                     onJoinedGame(account);
                 }
             } catch (ApiException apiException) {
+                apiException.printStackTrace();
+
             }
         }
 
@@ -123,11 +132,29 @@ public class MainActivity extends AppCompatActivity {
                     roomBuilder.setAutoMatchCriteria(
                             RoomConfig.createAutoMatchCriteria(minAutoPlayers, maxAutoPlayers, 0));
                 }
-                Games.getRealTimeMultiplayerClient(this, GoogleSignIn.getLastSignedInAccount(this))
+                Games.getRealTimeMultiplayerClient(this, mAccount)
                         .create(roomBuilder.build());
+
             }
         }
+        if (requestCode == RC_INVITATION_INBOX) {
+            if (resultCode == Activity.RESULT_OK) {
+                Invitation invitation = data.getExtras().getParcelable(Multiplayer.EXTRA_INVITATION);
+                if (invitation != null) {
+                    RoomConfig.Builder builder = RoomConfig.builder(mRoomUpdateCallback)
+                            .setInvitationIdToAccept(invitation.getInvitationId());
+                    Games.getRealTimeMultiplayerClient(getApplicationContext(),
+                            GoogleSignIn.getLastSignedInAccount(this))
+                            .join(builder.build());
+                    // prevent screen from sleeping during handshake
+                    getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                }
+            }
+        }
+
+
     }
+
 
     private void onCreateGameRoom(GoogleSignInAccount googleSignInAccount) {
 
@@ -136,29 +163,22 @@ public class MainActivity extends AppCompatActivity {
                 .addOnSuccessListener(new OnSuccessListener<Intent>() {
                     @Override
                     public void onSuccess(Intent intent) {
-                        startActivityForResult(intent, SIGN_GAMING);
+                        startActivityForResult(intent, START_GAME);
                     }
 
                 });
     }
 
     private void onJoinedGame(final GoogleSignInAccount googleSignInAccount) {
-        Games.getGamesClient(this, googleSignInAccount).getActivationHint().
-                addOnSuccessListener(new OnSuccessListener<Bundle>() {
+        Games.getInvitationsClient(this, googleSignInAccount)
+                .getInvitationInboxIntent()
+                .addOnSuccessListener(new OnSuccessListener<Intent>() {
                     @Override
-                    public void onSuccess(Bundle bundle) {
-                        Invitation invitation = bundle.getParcelable(Multiplayer.EXTRA_INVITATION);
-                        if (invitation != null) {
-                            RoomConfig.Builder builder = RoomConfig.builder(mRoomUpdateCallback)
-                                    .setInvitationIdToAccept(invitation.getInvitationId());
-                            Games.getRealTimeMultiplayerClient(getApplicationContext(),
-                                    googleSignInAccount)
-                                    .join(builder.build());
-                            // prevent screen from sleeping during handshake
-                            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-                        }
+                    public void onSuccess(Intent intent) {
+                        startActivityForResult(intent, RC_INVITATION_INBOX);
                     }
                 });
+
     }
 
     private RoomUpdateCallback mRoomUpdateCallback = new RoomUpdateCallback() {
@@ -179,9 +199,76 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onRoomConnected(int i, @Nullable Room room) {
+            Toast.makeText(getApplicationContext(), "HO", Toast.LENGTH_LONG).show();
+        }
+    };
+
+    RoomStatusUpdateCallback mRoomStatusCallbackHandler = new RoomStatusUpdateCallback() {
+        @Override
+        public void onRoomConnecting(@Nullable Room room) {
+
+        }
+
+        @Override
+        public void onRoomAutoMatching(@Nullable Room room) {
+
+        }
+
+        @Override
+        public void onPeerInvitedToRoom(@Nullable Room room, @NonNull List<String> list) {
+
+        }
+
+        @Override
+        public void onPeerDeclined(@Nullable Room room, @NonNull List<String> list) {
+
+        }
+
+        @Override
+        public void onPeerJoined(@Nullable Room room, @NonNull List<String> list) {
+
+        }
+
+        @Override
+        public void onPeerLeft(@Nullable Room room, @NonNull List<String> list) {
+
+        }
+
+        @Override
+        public void onConnectedToRoom(@Nullable Room room) {
+
+        }
+
+        @Override
+        public void onDisconnectedFromRoom(@Nullable Room room) {
+
+        }
+
+        @Override
+        public void onPeersConnected(@Nullable Room room, @NonNull List<String> list) {
+
+        }
+
+        @Override
+        public void onPeersDisconnected(@Nullable Room room, @NonNull List<String> list) {
+
+        }
+
+        @Override
+        public void onP2PConnected(@NonNull String s) {
+
+        }
+
+        @Override
+        public void onP2PDisconnected(@NonNull String s) {
 
         }
     };
-    private OnRealTimeMessageReceivedListener mMessageReceivedHandler;
-    private RoomStatusUpdateCallback mRoomStatusCallbackHandler;
+
+    OnRealTimeMessageReceivedListener mMessageReceivedHandler = new OnRealTimeMessageReceivedListener() {
+        @Override
+        public void onRealTimeMessageReceived(@NonNull RealTimeMessage realTimeMessage) {
+
+        }
+    };
 }
