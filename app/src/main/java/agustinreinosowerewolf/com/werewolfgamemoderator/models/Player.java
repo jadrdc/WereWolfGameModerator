@@ -1,5 +1,7 @@
 package agustinreinosowerewolf.com.werewolfgamemoderator.models;
 
+import android.net.Uri;
+
 import java.util.List;
 
 import agustinreinosowerewolf.com.werewolfgamemoderator.behaviors.VillagerPlayerAction;
@@ -10,6 +12,7 @@ public class Player {
     public int FREQUENCY;
     public boolean isInLove;
     public String name;
+    public Uri image;
     public boolean isProtected;
     public int votes;
     public boolean isAlive = true;
@@ -21,6 +24,13 @@ public class Player {
         isProtected = aProtected;
     }
 
+    public void setName(String username) {
+        name = username;
+    }
+
+    public void setImage(Uri imageIcon) {
+        image = imageIcon;
+    }
 
     public void setPriority(int priority) {
         PRIORITY = priority;

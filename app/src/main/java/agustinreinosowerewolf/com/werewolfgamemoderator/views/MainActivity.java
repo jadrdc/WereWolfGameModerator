@@ -1,38 +1,38 @@
 package agustinreinosowerewolf.com.werewolfgamemoderator.views;
 
-import android.Manifest;
 import android.app.Activity;
-import android.arch.lifecycle.ViewModelProvider;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
-import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
-import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.games.Game;
 import com.google.android.gms.games.Games;
-import com.google.android.gms.games.InvitationsClient;
+import com.google.android.gms.games.RealTimeMultiplayerClient;
 import com.google.android.gms.games.multiplayer.Invitation;
-import com.google.android.gms.games.multiplayer.InvitationCallback;
 import com.google.android.gms.games.multiplayer.Multiplayer;
+import com.google.android.gms.games.multiplayer.Participant;
 import com.google.android.gms.games.multiplayer.realtime.OnRealTimeMessageReceivedListener;
 import com.google.android.gms.games.multiplayer.realtime.RealTimeMessage;
 import com.google.android.gms.games.multiplayer.realtime.Room;
 import com.google.android.gms.games.multiplayer.realtime.RoomConfig;
 import com.google.android.gms.games.multiplayer.realtime.RoomStatusUpdateCallback;
 import com.google.android.gms.games.multiplayer.realtime.RoomUpdateCallback;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
@@ -40,38 +40,57 @@ import java.util.ArrayList;
 import java.util.List;
 
 import agustinreinosowerewolf.com.werewolfgamemoderator.R;
+import agustinreinosowerewolf.com.werewolfgamemoderator.SummaryFragment;
 import agustinreinosowerewolf.com.werewolfgamemoderator.adapters.ViewPagerFragmentAdapter;
+import agustinreinosowerewolf.com.werewolfgamemoderator.viewmodels.PlayerViewModel;
 import agustinreinosowerewolf.com.werewolfgamemoderator.viewmodels.UserViewModel;
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity {
 
-    private int RC_INVITATION_INBOX = 456;
     private UserViewModel mUserViewModel;
-    private int SIGN_GAMING = 123;
-    private int JOIN_GAME = 12345;
-    private int START_GAME = 1234;
+    private final int SIGN_GAMING = 1;
+    private final int JOIN_GAME = 2;
+    private final int START_GAME = 3;
+    private final int RC_INVITATION_INBOX = 4;
     private GoogleSignInClient mGoogleGameSignIn;
     private GoogleSignInAccount mAccount;
+    private RealTimeMultiplayerClient mClient;
+    public TabLayout tabLayout;
+    public ViewPager pager;
+    private ViewPagerFragmentAdapter adapter;
+    private PlayerViewModel playerViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ViewPagerFragmentAdapter adapter = new ViewPagerFragmentAdapter(getSupportFragmentManager());
         mUserViewModel = ViewModelProviders.of(this).get(UserViewModel.class);
-    }
+        playerViewModel = ViewModelProviders.of(this).get(PlayerViewModel.class);
+        ButterKnife.bind(this);
+
+        tabLayout=findViewById(R.id.tabs);
+        pager=findViewById(R.id.view_pager);
+        adapter = new ViewPagerFragmentAdapter(getSupportFragmentManager());
+        ViewPagerFragmentAdapter adapter = new ViewPagerFragmentAdapter(getSupportFragmentManager());
+        adapter.addFragment(new SummaryFragment());
+        adapter.addFragment(new PlayersListFragment());
+        pager.setAdapter(adapter);
+        tabLayout.setupWithViewPager(pager);
+        tabLayout.getTabAt(0).setIcon(R.drawable.list_not);
+        tabLayout.getTabAt(1).setIcon(R.drawable.profile);
+   }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
         getMenuInflater().inflate(R.menu.menu_bar, menu);
-
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
 
         switch (item.getItemId()) {
             case R.id.logout: {
@@ -82,14 +101,11 @@ public class MainActivity extends AppCompatActivity {
                 break;
             }
             case R.id.btn_set_game: {
-                mGoogleGameSignIn = mUserViewModel.getmAuthManager().getValue().authGame(this);
-                startActivityForResult(mGoogleGameSignIn.getSignInIntent(), SIGN_GAMING);
+                startIntent(SIGN_GAMING);
                 break;
             }
             case R.id.btn_play_game: {
-                mGoogleGameSignIn = mUserViewModel.getmAuthManager().getValue().authGame(this);
-                startActivityForResult(mGoogleGameSignIn.getSignInIntent(), JOIN_GAME);
-
+                startIntent(JOIN_GAME);
                 break;
             }
 
@@ -97,6 +113,11 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    private void startIntent(int ACTION) {
+        mGoogleGameSignIn = mUserViewModel.getmAuthManager().getValue().authGame(this);
+        startActivityForResult(mGoogleGameSignIn.getSignInIntent(), ACTION);
+
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -141,12 +162,13 @@ public class MainActivity extends AppCompatActivity {
             if (resultCode == Activity.RESULT_OK) {
                 Invitation invitation = data.getExtras().getParcelable(Multiplayer.EXTRA_INVITATION);
                 if (invitation != null) {
+
                     RoomConfig.Builder builder = RoomConfig.builder(mRoomUpdateCallback)
-                            .setInvitationIdToAccept(invitation.getInvitationId());
-                    Games.getRealTimeMultiplayerClient(getApplicationContext(),
-                            GoogleSignIn.getLastSignedInAccount(this))
-                            .join(builder.build());
-                    // prevent screen from sleeping during handshake
+                            .setInvitationIdToAccept(invitation.getInvitationId()).setOnMessageReceivedListener(mMessageReceivedHandler).
+                                    setRoomStatusUpdateCallback(mRoomStatusCallbackHandler);
+
+                    mClient.join(builder.build());
+
                     getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                 }
             }
@@ -157,9 +179,10 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void onCreateGameRoom(GoogleSignInAccount googleSignInAccount) {
-
-        Games.getRealTimeMultiplayerClient(this, googleSignInAccount)
-                .getSelectOpponentsIntent(1, 8, true)
+        if (mClient == null) {
+            mClient = Games.getRealTimeMultiplayerClient(this, googleSignInAccount);
+        }
+        mClient.getSelectOpponentsIntent(1, 8, true)
                 .addOnSuccessListener(new OnSuccessListener<Intent>() {
                     @Override
                     public void onSuccess(Intent intent) {
@@ -170,6 +193,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void onJoinedGame(final GoogleSignInAccount googleSignInAccount) {
+        if (mClient == null) {
+            mClient = Games.getRealTimeMultiplayerClient(this, googleSignInAccount);
+        }
         Games.getInvitationsClient(this, googleSignInAccount)
                 .getInvitationInboxIntent()
                 .addOnSuccessListener(new OnSuccessListener<Intent>() {
@@ -198,15 +224,36 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onRoomConnected(int i, @Nullable Room room) {
-            Toast.makeText(getApplicationContext(), "HO", Toast.LENGTH_LONG).show();
+        public void onRoomConnected(int i, @Nullable final Room room) {
+
+
+            for (Participant participant : room.getParticipants()) {
+                playerViewModel.createPlayer(participant.getDisplayName(), participant.getIconImageUri());
+            }
         }
     };
+
 
     RoomStatusUpdateCallback mRoomStatusCallbackHandler = new RoomStatusUpdateCallback() {
         @Override
         public void onRoomConnecting(@Nullable Room room) {
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), "jadrdc");
+            builder.setSmallIcon(R.drawable.notification)
+                    .setContentText("Se ha conectado: ")
+                    .setContentTitle("Nuevo Objeto Reportado").setChannelId("jadrdc").
+                    setPriority(NotificationCompat.PRIORITY_HIGH).setStyle(new NotificationCompat.BigTextStyle().bigText("SE HA CONECTADO UN NUEVO JUGADOR"));
 
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                int importance = NotificationManager.IMPORTANCE_DEFAULT;
+                NotificationChannel channel = new NotificationChannel("jadrdc", "notif", importance);
+                channel.setDescription(" NOTIFICATION CHANNEL ");
+                NotificationManager notificationManager = getSystemService(NotificationManager.class);
+                notificationManager.createNotificationChannel(channel);
+                notificationManager.notify(1, builder.build());
+            } else {
+                NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getApplicationContext());
+                notificationManager.notify(1, builder.build());
+            }
         }
 
         @Override
