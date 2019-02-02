@@ -5,6 +5,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -17,11 +18,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.games.Game;
 import com.google.android.gms.games.Games;
 import com.google.android.gms.games.RealTimeMultiplayerClient;
 import com.google.android.gms.games.multiplayer.Invitation;
@@ -36,15 +39,16 @@ import com.google.android.gms.games.multiplayer.realtime.RoomUpdateCallback;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import agustinreinosowerewolf.com.werewolfgamemoderator.R;
-import agustinreinosowerewolf.com.werewolfgamemoderator.SummaryFragment;
 import agustinreinosowerewolf.com.werewolfgamemoderator.adapters.ViewPagerFragmentAdapter;
+import agustinreinosowerewolf.com.werewolfgamemoderator.helpers.SerializeHelper;
+import agustinreinosowerewolf.com.werewolfgamemoderator.models.Player;
 import agustinreinosowerewolf.com.werewolfgamemoderator.viewmodels.PlayerViewModel;
 import agustinreinosowerewolf.com.werewolfgamemoderator.viewmodels.UserViewModel;
-import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity {
@@ -70,8 +74,8 @@ public class MainActivity extends AppCompatActivity {
         playerViewModel = ViewModelProviders.of(this).get(PlayerViewModel.class);
         ButterKnife.bind(this);
 
-        tabLayout=findViewById(R.id.tabs);
-        pager=findViewById(R.id.view_pager);
+        tabLayout = findViewById(R.id.tabs);
+        pager = findViewById(R.id.view_pager);
         adapter = new ViewPagerFragmentAdapter(getSupportFragmentManager());
         ViewPagerFragmentAdapter adapter = new ViewPagerFragmentAdapter(getSupportFragmentManager());
         adapter.addFragment(new SummaryFragment());
@@ -80,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
         tabLayout.setupWithViewPager(pager);
         tabLayout.getTabAt(0).setIcon(R.drawable.list_not);
         tabLayout.getTabAt(1).setIcon(R.drawable.profile);
-   }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -225,11 +229,12 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onRoomConnected(int i, @Nullable final Room room) {
-
+            Toast.makeText(getApplicationContext(), "TODOS SE HAN CONECTADO", Toast.LENGTH_LONG).show();
 
             for (Participant participant : room.getParticipants()) {
-                playerViewModel.createPlayer(participant.getDisplayName(), participant.getIconImageUri());
+                playerViewModel.createPlayer(participant.getDisplayName(), participant.getHiResImageUri(),participant.getParticipantId());
             }
+            playerViewModel.getIsLoading().setValue(false);
         }
     };
 
@@ -237,6 +242,7 @@ public class MainActivity extends AppCompatActivity {
     RoomStatusUpdateCallback mRoomStatusCallbackHandler = new RoomStatusUpdateCallback() {
         @Override
         public void onRoomConnecting(@Nullable Room room) {
+            playerViewModel.setRoomId(room.getRoomId());
             NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), "jadrdc");
             builder.setSmallIcon(R.drawable.notification)
                     .setContentText("Se ha conectado: ")
@@ -316,6 +322,20 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onRealTimeMessageReceived(@NonNull RealTimeMessage realTimeMessage) {
 
+            byte [] data=realTimeMessage.getMessageData();
+            try {
+                List<Player>  players=(List<Player>) SerializeHelper.deserialize(data);
+                playerViewModel.setParticipants(players);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+
+
         }
     };
+
+
+
 }

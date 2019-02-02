@@ -45,12 +45,12 @@ public class AddPlayerActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
         List<ChracterInfoModel> list = new ArrayList<ChracterInfoModel>();
-        list.add(new ChracterInfoModel("BODYGUARD", R.drawable.swordman));
-        list.add(new ChracterInfoModel("HUNTER", R.drawable.bandit));
-        list.add(new ChracterInfoModel("CUPID", R.drawable.cupidonarrow));
+        list.add(new ChracterInfoModel("BODYGUARD", R.drawable.bodyguard));
+        list.add(new ChracterInfoModel("HUNTER", R.drawable.hunter));
+        list.add(new ChracterInfoModel("CUPID", R.drawable.cupid));
         list.add(new ChracterInfoModel("WOLF", R.drawable.wolfhead));
-        list.add(new ChracterInfoModel("WITCH", R.drawable.witchsmall));
-        list.add(new ChracterInfoModel("VILLAGER", R.drawable.farmersmall));
+        list.add(new ChracterInfoModel("WITCH", R.drawable.witch));
+        list.add(new ChracterInfoModel("VILLAGER", R.drawable.farmer));
         SpinnerAdapter adapter = new SpinnerChooserAdapter(getApplicationContext(),
                 list);
 

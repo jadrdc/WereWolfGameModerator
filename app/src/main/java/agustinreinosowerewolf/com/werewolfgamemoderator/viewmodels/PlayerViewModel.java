@@ -15,31 +15,47 @@ import agustinreinosowerewolf.com.werewolfgamemoderator.models.PlayerManager;
 
 public class PlayerViewModel extends AndroidViewModel {
 
-    public LiveData<List<Player>> mPlayerList;
-    public PlayerManager manager;
+    private MutableLiveData<List<Player>> mPlayerList = new MutableLiveData<>();
+    private PlayerManager manager;
+    private List<Player> mPlayers = new ArrayList<>();
+    private MutableLiveData<Boolean> isLoading = new MutableLiveData<>();
+
+    public String getRoomId() {
+        return roomId;
+    }
+
+    public void setRoomId(String roomId) {
+        this.roomId = roomId;
+    }
+
+    private String roomId;
 
     public PlayerViewModel(@NonNull Application application) {
         super(application);
+        mPlayerList.setValue(new ArrayList<Player>());
 
     }
 
     public LiveData<List<Player>> getmPlayerList() {
-        if (mPlayerList == null) {
-            mPlayerList = new MutableLiveData<>();
-            ((MutableLiveData<List<Player>>) mPlayerList).setValue(new ArrayList<Player>());
-        }
         return mPlayerList;
     }
 
-    public void createPlayer(String name, Uri icon) {
-        if (mPlayerList == null) {
-            mPlayerList = new MutableLiveData<>();
-        }
+    public MutableLiveData<Boolean> getIsLoading() {
+        return isLoading;
+    }
+
+    public void setParticipants(List<Player> players) {
+        mPlayers = players;
+        mPlayerList.setValue(mPlayers);
+    }
+
+    public void createPlayer(String name, Uri icon, String participantId) {
         if (manager == null) {
             manager = new PlayerManager();
         }
-        mPlayerList.getValue().add(manager.createPlayer(name, icon));
-
+        mPlayers.add(manager.createPlayer(name, icon, participantId));
+        mPlayerList.setValue(mPlayers);
+        isLoading.setValue(true);
 
     }
 

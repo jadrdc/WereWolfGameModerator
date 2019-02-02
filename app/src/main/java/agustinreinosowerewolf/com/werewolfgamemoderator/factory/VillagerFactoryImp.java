@@ -17,7 +17,7 @@ public class VillagerFactoryImp implements VillagerFactory {
         {
             action=new WitchBehavior();
         }
-        else if(type.equals("VILLAGE"))
+        else if(type.equals("VILLAGER"))
         {
             action=new VillagerBehavior();
         }

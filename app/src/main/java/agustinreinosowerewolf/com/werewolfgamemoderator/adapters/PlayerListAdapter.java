@@ -9,21 +9,29 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.android.gms.common.images.ImageManager;
+
+import java.util.ArrayList;
 import java.util.List;
 
 import agustinreinosowerewolf.com.werewolfgamemoderator.R;
 import agustinreinosowerewolf.com.werewolfgamemoderator.models.Player;
-import butterknife.BindView;
 
-import static android.support.v7.widget.RecyclerView.*;
+import static android.support.v7.widget.RecyclerView.ViewHolder;
 
 public class PlayerListAdapter extends RecyclerView.Adapter<PlayerListAdapter.PlayerViewHolder> {
     private Context context;
     private List<Player> playerList;
 
-    public PlayerListAdapter(Context appContext, List<Player> players) {
+    public void setListener(SelectPlayerListener listener) {
+        this.listener = listener;
+    }
+
+    private SelectPlayerListener listener;
+
+    public PlayerListAdapter(Context appContext) {
         context = appContext;
-        playerList = players;
+        playerList = new ArrayList<>();
 
     }
 
@@ -37,8 +45,13 @@ public class PlayerListAdapter extends RecyclerView.Adapter<PlayerListAdapter.Pl
 
     @Override
     public void onBindViewHolder(@NonNull PlayerViewHolder holder, int position) {
-        holder.setPlayer(playerList.get(position));
+        holder.setPlayer(playerList.get(position), context);
 
+    }
+
+    public void addPlayers(List<Player> players) {
+        this.playerList = players;
+        notifyDataSetChanged();
     }
 
     @Override
@@ -46,19 +59,37 @@ public class PlayerListAdapter extends RecyclerView.Adapter<PlayerListAdapter.Pl
         return playerList.size();
     }
 
-    public static class PlayerViewHolder extends ViewHolder {
+
+    public interface SelectPlayerListener {
+        public void onSelectPlayer(Player playe, ImageView imageView);
+
+
+    }
+
+    public class PlayerViewHolder extends ViewHolder {
         public ImageView imageView;
         public TextView txtName;
+        public ImageView imgRole;
 
         public PlayerViewHolder(View itemView) {
             super(itemView);
             imageView = itemView.findViewById(R.id.player_icon);
+
             txtName = itemView.findViewById(R.id.player_username);
+            imgRole=itemView.findViewById(R.id.rol_icon);
         }
 
-        public void setPlayer(Player player) {
-            txtName.setText(player.name);
-            imageView.setImageURI(player.image);
+        public void setPlayer(final Player player, Context context) {
+            txtName.setText(player.getName());
+            ImageManager imageManager = ImageManager.create(context);
+            imageManager.loadImage(imageView, player.getImage());
+            imageView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    PlayerListAdapter.this.listener.onSelectPlayer(player,imgRole);
+                }
+            });
+
         }
     }
 }

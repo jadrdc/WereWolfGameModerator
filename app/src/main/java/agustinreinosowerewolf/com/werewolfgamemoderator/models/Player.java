@@ -2,23 +2,101 @@ package agustinreinosowerewolf.com.werewolfgamemoderator.models;
 
 import android.net.Uri;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import agustinreinosowerewolf.com.werewolfgamemoderator.behaviors.VillagerPlayerAction;
 import agustinreinosowerewolf.com.werewolfgamemoderator.behaviors.WolfPlayerAction;
 
-public class Player {
-    public int PRIORITY;
-    public int FREQUENCY;
-    public boolean isInLove;
-    public String name;
-    public Uri image;
-    public boolean isProtected;
-    public int votes;
-    public boolean isAlive = true;
-    public List<WolfPlayerAction> wolfPlayerActions;
-    public List<VillagerPlayerAction> villagerPlayerActions;
+public class Player  implements Serializable {
+    private int PRIORITY;
+    private int FREQUENCY;
+    private boolean isInLove;
+    private String name;
+    private transient  Uri image;
+    private boolean isProtected;
+    private int votes;
+    private boolean isAlive = true;
+    private List<WolfPlayerAction> wolfPlayerActions= new ArrayList<>();
+    private List<VillagerPlayerAction> villagerPlayerActions=new ArrayList<>();
+    private String participantId;
 
+    public String getParticipantId() {
+        return participantId;
+    }
+
+    public void setParticipantId(String participantId) {
+        this.participantId = participantId;
+    }
+
+    public int getPRIORITY() {
+        return PRIORITY;
+    }
+
+    public void setPRIORITY(int PRIORITY) {
+        this.PRIORITY = PRIORITY;
+    }
+
+    public int getFREQUENCY() {
+        return FREQUENCY;
+    }
+
+    public void setFREQUENCY(int FREQUENCY) {
+        this.FREQUENCY = FREQUENCY;
+    }
+
+    public boolean isInLove() {
+        return isInLove;
+    }
+
+    public void setInLove(boolean inLove) {
+        isInLove = inLove;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Uri getImage() {
+        return image;
+    }
+
+    public boolean isProtected() {
+        return isProtected;
+    }
+
+    public int getVotes() {
+        return votes;
+    }
+
+    public void setVotes(int votes) {
+        this.votes = votes;
+    }
+
+    public boolean isAlive() {
+        return isAlive;
+    }
+
+    public void setAlive(boolean alive) {
+        isAlive = alive;
+    }
+
+    public List<WolfPlayerAction> getWolfPlayerActions() {
+        return wolfPlayerActions;
+    }
+
+    public void setWolfPlayerActions(List<WolfPlayerAction> wolfPlayerActions) {
+        this.wolfPlayerActions = wolfPlayerActions;
+    }
+
+    public List<VillagerPlayerAction> getVillagerPlayerActions() {
+        return villagerPlayerActions;
+    }
+
+    public void setVillagerPlayerActions(List<VillagerPlayerAction> villagerPlayerActions) {
+        this.villagerPlayerActions = villagerPlayerActions;
+    }
 
     public void setProtected(boolean aProtected) {
         isProtected = aProtected;
