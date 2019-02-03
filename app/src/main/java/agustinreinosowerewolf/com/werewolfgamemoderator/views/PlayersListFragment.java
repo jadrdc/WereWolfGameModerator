@@ -90,10 +90,11 @@ public class PlayersListFragment extends Fragment implements PlayerListAdapter.S
             @Override
             public void onChanged(@Nullable Boolean aBoolean) {
                 mProgressbar.setVisibility(aBoolean.booleanValue() == true ? View.VISIBLE : View.INVISIBLE);
+                mButton.setVisibility(aBoolean.booleanValue() == false ? View.VISIBLE : View.INVISIBLE);
             }
         });
 
-/*        new Thread(new Runnable() {
+        new Thread(new Runnable() {
             @Override
             public void run() {
                 mButton.setOnClickListener(new View.OnClickListener() {
@@ -103,7 +104,8 @@ public class PlayersListFragment extends Fragment implements PlayerListAdapter.S
                         for (Player player : playerViewModel.getmPlayerList().getValue()) {
                             try {
                                 Games.getRealTimeMultiplayerClient(getActivity(), GoogleSignIn.getLastSignedInAccount(getActivity()))
-                                        .sendReliableMessage(SerializeHelper.serialize(playerViewModel.getmPlayerList().getValue()), playerViewModel.getRoomId(), player.getParticipantId(),
+                                        .sendReliableMessage(SerializeHelper.serialize(playerViewModel.getmPlayerList().getValue()),
+                                                playerViewModel.getRoomId(), player.getParticipantId(),
                                                 new RealTimeMultiplayerClient.ReliableMessageSentCallback() {
                                                     @Override
                                                     public void onRealTimeMessageSent(int i, int i1, String s) {
@@ -132,7 +134,6 @@ public class PlayersListFragment extends Fragment implements PlayerListAdapter.S
                 });
             }
         }).start();
-*/
 
         return view;
     }

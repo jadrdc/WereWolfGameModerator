@@ -5,7 +5,6 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -24,7 +23,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.games.Game;
 import com.google.android.gms.games.Games;
 import com.google.android.gms.games.RealTimeMultiplayerClient;
 import com.google.android.gms.games.multiplayer.Invitation;
@@ -105,10 +103,13 @@ public class MainActivity extends AppCompatActivity {
                 break;
             }
             case R.id.btn_set_game: {
+                mUserViewModel.getIsLoading().setValue(true);
                 startIntent(SIGN_GAMING);
                 break;
             }
             case R.id.btn_play_game: {
+//                mUserViewModel.getIsLoading().setValue(true);
+                playerViewModel.setUpViewModel();
                 startIntent(JOIN_GAME);
                 break;
             }
@@ -159,6 +160,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 Games.getRealTimeMultiplayerClient(this, mAccount)
                         .create(roomBuilder.build());
+
 
             }
         }
@@ -231,14 +233,48 @@ public class MainActivity extends AppCompatActivity {
         public void onRoomConnected(int i, @Nullable final Room room) {
             Toast.makeText(getApplicationContext(), "TODOS SE HAN CONECTADO", Toast.LENGTH_LONG).show();
 
-            for (Participant participant : room.getParticipants()) {
-                playerViewModel.createPlayer(participant.getDisplayName(), participant.getHiResImageUri(),participant.getParticipantId());
-            }
-            playerViewModel.getIsLoading().setValue(false);
+
+            Games.getPlayersClient(getApplicationContext(), mAccount).getCurrentPlayerId().
+                    addOnSuccessListener(new OnSuccessListener<String>() {
+                        @Override
+                        public void onSuccess(String s) {
+
+                            if (room.getParticipantId(s).
+                                    equals(room.getCreatorId())) {
+                                for (Participant participant : room.getParticipants()) {
+
+                                    playerViewModel.createPlayer(
+                                            participant.getDisplayName(),
+                                            participant.getHiResImageUri(),
+                                            participant.getParticipantId());
+                                }
+                                playerViewModel.getIsLoading().setValue(false);
+                            }
+                        }
+                    });
+
+
         }
     };
 
 
+    OnRealTimeMessageReceivedListener mMessageReceivedHandler = new OnRealTimeMessageReceivedListener() {
+        @Override
+        public void onRealTimeMessageReceived(@NonNull RealTimeMessage realTimeMessage) {
+
+            byte[] data = realTimeMessage.getMessageData();
+            try {
+                List<Player> players = (List<Player>) SerializeHelper.deserialize(data);
+                playerViewModel.setParticipants(players);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+
+
+        }
+    };
     RoomStatusUpdateCallback mRoomStatusCallbackHandler = new RoomStatusUpdateCallback() {
         @Override
         public void onRoomConnecting(@Nullable Room room) {
@@ -318,24 +354,8 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    OnRealTimeMessageReceivedListener mMessageReceivedHandler = new OnRealTimeMessageReceivedListener() {
-        @Override
-        public void onRealTimeMessageReceived(@NonNull RealTimeMessage realTimeMessage) {
-
-            byte [] data=realTimeMessage.getMessageData();
-            try {
-                List<Player>  players=(List<Player>) SerializeHelper.deserialize(data);
-                playerViewModel.setParticipants(players);
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
-
-
-        }
-    };
-
-
 
 }
+
+
+

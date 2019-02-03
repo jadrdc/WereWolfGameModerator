@@ -18,8 +18,8 @@ public class Player  implements Serializable {
     private boolean isProtected;
     private int votes;
     private boolean isAlive = true;
-    private List<WolfPlayerAction> wolfPlayerActions= new ArrayList<>();
-    private List<VillagerPlayerAction> villagerPlayerActions=new ArrayList<>();
+    private transient List<WolfPlayerAction> wolfPlayerActions= new ArrayList<>();
+    private transient List<VillagerPlayerAction> villagerPlayerActions=new ArrayList<>();
     private String participantId;
 
     public String getParticipantId() {

@@ -36,6 +36,12 @@ public class PlayerViewModel extends AndroidViewModel {
 
     }
 
+    public void setUpViewModel() {
+        mPlayerList.getValue().clear();
+        isLoading.setValue(true);
+
+    }
+
     public LiveData<List<Player>> getmPlayerList() {
         return mPlayerList;
     }
@@ -47,6 +53,7 @@ public class PlayerViewModel extends AndroidViewModel {
     public void setParticipants(List<Player> players) {
         mPlayers = players;
         mPlayerList.setValue(mPlayers);
+        isLoading.setValue(false);
     }
 
     public void createPlayer(String name, Uri icon, String participantId) {
