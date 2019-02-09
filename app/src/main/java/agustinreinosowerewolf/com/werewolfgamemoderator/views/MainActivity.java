@@ -80,8 +80,8 @@ public class MainActivity extends AppCompatActivity {
         adapter.addFragment(new PlayersListFragment());
         pager.setAdapter(adapter);
         tabLayout.setupWithViewPager(pager);
-        tabLayout.getTabAt(0).setIcon(R.drawable.list_not);
         tabLayout.getTabAt(1).setIcon(R.drawable.profile);
+        tabLayout.getTabAt(0).setIcon(R.drawable.list_not);
     }
 
     @Override

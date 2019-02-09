@@ -28,7 +28,6 @@
             </intent-filter>
         </activity>
         <activity android:name=".views.MainActivity" />
-        <activity android:name=".views.AddPlayerActivity"></activity>
     </application>
 
 </manifest>
