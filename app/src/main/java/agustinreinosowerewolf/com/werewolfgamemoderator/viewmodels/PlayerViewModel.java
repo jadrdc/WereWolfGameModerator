@@ -56,11 +56,11 @@ public class PlayerViewModel extends AndroidViewModel {
         isLoading.setValue(false);
     }
 
-    public void createPlayer(String name, Uri icon, String participantId) {
+    public void createPlayer(String name, Uri icon, String participantId,String playerId) {
         if (manager == null) {
             manager = new PlayerManager();
         }
-        mPlayers.add(manager.createPlayer(name, icon, participantId));
+        mPlayers.add(manager.createPlayer(name, icon, participantId,playerId));
         mPlayerList.setValue(mPlayers);
         isLoading.setValue(true);
 

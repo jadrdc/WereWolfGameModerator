@@ -17,6 +17,11 @@ public class ViewPagerFragmentAdapter extends FragmentPagerAdapter {
     }
 
 
+    public void removeItem(Fragment fragment) {
+        mFragmentList.remove(fragment);
+        notifyDataSetChanged();
+    }
+
     @Override
     public Fragment getItem(int position) {
         return mFragmentList.get(position);

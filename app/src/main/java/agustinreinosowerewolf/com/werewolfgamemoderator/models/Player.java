@@ -14,13 +14,7 @@ public class Player  implements Serializable {
     private int FREQUENCY;
     private boolean isInLove;
     private String name;
-    private transient  Uri image;
-    private boolean isProtected;
-    private int votes;
-    private boolean isAlive = true;
-    private transient List<WolfPlayerAction> wolfPlayerActions= new ArrayList<>();
-    private transient List<VillagerPlayerAction> villagerPlayerActions=new ArrayList<>();
-    private String participantId;
+    private  String participantId;
 
     public String getParticipantId() {
         return participantId;
@@ -28,6 +22,39 @@ public class Player  implements Serializable {
 
     public void setParticipantId(String participantId) {
         this.participantId = participantId;
+    }
+
+    public String getPlayerId() {
+        return playerId;
+    }
+
+    public void setPlayerId(String playerId) {
+        this.playerId = playerId;
+    }
+
+    private transient  Uri image;
+    private boolean isProtected;
+    private int votes;
+    private boolean isAlive = true;
+    private  WolfPlayerAction wolfPlayerActions;
+    private  List<VillagerPlayerAction> villagerPlayerActions=new ArrayList<>();
+    private String playerId;
+    private  int imageResource;
+
+    public int getImageResource() {
+        return imageResource;
+    }
+
+    public void setImageResource(int imageResource) {
+        this.imageResource = imageResource;
+    }
+
+    public String getplayerId() {
+        return playerId;
+    }
+
+    public void setplayerId(String participantId) {
+        this.playerId = participantId;
     }
 
     public int getPRIORITY() {
@@ -82,11 +109,11 @@ public class Player  implements Serializable {
         isAlive = alive;
     }
 
-    public List<WolfPlayerAction> getWolfPlayerActions() {
+    public WolfPlayerAction getWolfPlayerActions() {
         return wolfPlayerActions;
     }
 
-    public void setWolfPlayerActions(List<WolfPlayerAction> wolfPlayerActions) {
+    public void setWolfPlayerActions(WolfPlayerAction wolfPlayerActions) {
         this.wolfPlayerActions = wolfPlayerActions;
     }
 

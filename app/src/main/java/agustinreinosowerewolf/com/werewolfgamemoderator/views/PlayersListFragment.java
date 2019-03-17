@@ -94,46 +94,42 @@ public class PlayersListFragment extends Fragment implements PlayerListAdapter.S
             }
         });
 
-        new Thread(new Runnable() {
+        mButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void run() {
-                mButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
+            public void onClick(View v) {
 
-                        for (Player player : playerViewModel.getmPlayerList().getValue()) {
-                            try {
-                                Games.getRealTimeMultiplayerClient(getActivity(), GoogleSignIn.getLastSignedInAccount(getActivity()))
-                                        .sendReliableMessage(SerializeHelper.serialize(playerViewModel.getmPlayerList().getValue()),
-                                                playerViewModel.getRoomId(), player.getParticipantId(),
-                                                new RealTimeMultiplayerClient.ReliableMessageSentCallback() {
-                                                    @Override
-                                                    public void onRealTimeMessageSent(int i, int i1, String s) {
+                for (Player player : playerViewModel.getmPlayerList().getValue()) {
+                    try {
+                        Games.getRealTimeMultiplayerClient(getActivity(), GoogleSignIn.getLastSignedInAccount(getActivity()))
+                                .sendReliableMessage(SerializeHelper.serialize
+                                                (playerViewModel.getmPlayerList().getValue()),
+                                        playerViewModel.getRoomId(), player.getParticipantId(),
+                                        new RealTimeMultiplayerClient.ReliableMessageSentCallback() {
+                                            @Override
+                                            public void onRealTimeMessageSent(int i, int i1, String s) {
 
-                                                    }
-                                                }).addOnSuccessListener(new OnSuccessListener<Integer>() {
-                                    @Override
-                                    public void onSuccess(Integer integer) {
-                                        Toast.makeText(getActivity(), "Se ha iniciado el juego ", Toast.LENGTH_LONG).show();
-                                    }
-                                }).addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-                                        Toast.makeText(getActivity(), "Error iniciando el juego ", Toast.LENGTH_LONG).show();
-
-                                    }
-                                });
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                                Toast.makeText(getActivity(), e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+                                            }
+                                        }).addOnSuccessListener(new OnSuccessListener<Integer>() {
+                            @Override
+                            public void onSuccess(Integer integer) {
+                                Toast.makeText(getActivity(), "Se ha iniciado el juego ", Toast.LENGTH_LONG).show();
                             }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Toast.makeText(getActivity(), e.toString(), Toast.LENGTH_LONG).show();
 
-                        }
-
+                            }
+                        });
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        Toast.makeText(getActivity(), e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
                     }
-                });
+
+                }
             }
-        }).start();
+        });
+
 
         return view;
     }
@@ -165,7 +161,7 @@ public class PlayersListFragment extends Fragment implements PlayerListAdapter.S
 
                 if (word.equals("WOLF")) {
                     WolfFactory wolfFactory = new WolfFactoryImp();
-                    player.getWolfPlayerActions().add(wolfFactory.getWolfAction(word));
+                    player.setWolfPlayerActions(wolfFactory.getWolfAction(word));
 
                 } else {
                     VillagerFactoryImp factoryImp = new VillagerFactoryImp();
@@ -174,18 +170,30 @@ public class PlayersListFragment extends Fragment implements PlayerListAdapter.S
 
                 if (word.equals("WITCH")) {
                     image.setImageResource(R.drawable.witch);
+                    player.setImageResource(R.drawable.witch);
+
                 } else if (word.equals("VILLAGER")) {
                     image.setImageResource(R.drawable.farmer);
+                    player.setImageResource(R.drawable.farmer);
+
                 } else if (word.equals("HUNTER")) {
 
                     image.setImageResource(R.drawable.hunter);
+                    player.setImageResource(R.drawable.hunter);
+
                 } else if (word.equals("CUPID")) {
 
                     image.setImageResource(R.drawable.cupid);
+                    player.setImageResource(R.drawable.cupid);
+
                 } else if (word.equals("BODYGUARD")) {
                     image.setImageResource(R.drawable.bodyguard);
+                    player.setImageResource(R.drawable.bodyguard);
+
                 } else {
                     image.setImageResource(R.drawable.wolfhead);
+                    player.setImageResource(R.drawable.wolfhead);
+
 
                 }
 

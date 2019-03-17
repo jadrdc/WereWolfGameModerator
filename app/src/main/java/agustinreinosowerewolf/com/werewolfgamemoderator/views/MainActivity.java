@@ -45,6 +45,7 @@ import agustinreinosowerewolf.com.werewolfgamemoderator.R;
 import agustinreinosowerewolf.com.werewolfgamemoderator.adapters.ViewPagerFragmentAdapter;
 import agustinreinosowerewolf.com.werewolfgamemoderator.helpers.SerializeHelper;
 import agustinreinosowerewolf.com.werewolfgamemoderator.models.Player;
+import agustinreinosowerewolf.com.werewolfgamemoderator.viewmodels.PlayerPartyViewModel;
 import agustinreinosowerewolf.com.werewolfgamemoderator.viewmodels.PlayerViewModel;
 import agustinreinosowerewolf.com.werewolfgamemoderator.viewmodels.UserViewModel;
 import butterknife.ButterKnife;
@@ -52,6 +53,7 @@ import butterknife.ButterKnife;
 public class MainActivity extends AppCompatActivity {
 
     private UserViewModel mUserViewModel;
+    private PlayerPartyViewModel playerPartyViewModel;
     private final int SIGN_GAMING = 1;
     private final int JOIN_GAME = 2;
     private final int START_GAME = 3;
@@ -76,12 +78,9 @@ public class MainActivity extends AppCompatActivity {
         pager = findViewById(R.id.view_pager);
         adapter = new ViewPagerFragmentAdapter(getSupportFragmentManager());
         ViewPagerFragmentAdapter adapter = new ViewPagerFragmentAdapter(getSupportFragmentManager());
-        adapter.addFragment(new SummaryFragment());
-        adapter.addFragment(new PlayersListFragment());
         pager.setAdapter(adapter);
         tabLayout.setupWithViewPager(pager);
-        tabLayout.getTabAt(1).setIcon(R.drawable.profile);
-        tabLayout.getTabAt(0).setIcon(R.drawable.list_not);
+
     }
 
     @Override
@@ -103,12 +102,10 @@ public class MainActivity extends AppCompatActivity {
                 break;
             }
             case R.id.btn_set_game: {
-                mUserViewModel.getIsLoading().setValue(true);
                 startIntent(SIGN_GAMING);
                 break;
             }
             case R.id.btn_play_game: {
-//                mUserViewModel.getIsLoading().setValue(true);
                 playerViewModel.setUpViewModel();
                 startIntent(JOIN_GAME);
                 break;
@@ -233,20 +230,26 @@ public class MainActivity extends AppCompatActivity {
         public void onRoomConnected(int i, @Nullable final Room room) {
             Toast.makeText(getApplicationContext(), "TODOS SE HAN CONECTADO", Toast.LENGTH_LONG).show();
 
-
             Games.getPlayersClient(getApplicationContext(), mAccount).getCurrentPlayerId().
                     addOnSuccessListener(new OnSuccessListener<String>() {
                         @Override
                         public void onSuccess(String s) {
 
-                            if (room.getParticipantId(s).
-                                    equals(room.getCreatorId())) {
+                            if (room.getParticipantId(s).equals(room.getCreatorId())) {
+                                adapter.addFragment(new SummaryFragment());
+                                adapter.addFragment(new PlayersListFragment());
+                                adapter.notifyDataSetChanged();
+                                pager.setAdapter(adapter);
+                                tabLayout.setupWithViewPager(pager);
+                                tabLayout.getTabAt(1).setIcon(R.drawable.profile);
+                                tabLayout.getTabAt(0).setIcon(R.drawable.list_not);
+
                                 for (Participant participant : room.getParticipants()) {
 
                                     playerViewModel.createPlayer(
                                             participant.getDisplayName(),
-                                            participant.getHiResImageUri(),
-                                            participant.getParticipantId());
+                                            participant.getHiResImageUri(), participant.getParticipantId(),
+                                            participant.getPlayer().getPlayerId());
                                 }
                                 playerViewModel.getIsLoading().setValue(false);
                             }
@@ -264,8 +267,59 @@ public class MainActivity extends AppCompatActivity {
 
             byte[] data = realTimeMessage.getMessageData();
             try {
-                List<Player> players = (List<Player>) SerializeHelper.deserialize(data);
-                playerViewModel.setParticipants(players);
+                final List<Player> players = (List<Player>) SerializeHelper.deserialize(data);
+                playerPartyViewModel = ViewModelProviders.of(MainActivity.this).
+                        get(PlayerPartyViewModel.class);
+                playerPartyViewModel.setMplayerParty(players);
+                Games.getPlayersClient(getApplicationContext(), mAccount).getCurrentPlayerId().addOnSuccessListener(new OnSuccessListener<String>() {
+                    @Override
+                    public void onSuccess(String s) {
+
+                        for (Player p : players) {
+
+                            if (p.getplayerId().equals(s)) {
+                                p.setImage(p.getImage());
+                                playerPartyViewModel.setCurrentPlayer(p);
+                                adapter.addFragment(new SummaryFragment());
+                                adapter.addFragment(new PartyInformationFragment());
+                                adapter.notifyDataSetChanged();
+                                pager.setAdapter(adapter);
+                                tabLayout.setupWithViewPager(pager);
+                                tabLayout.getTabAt(1).setIcon(R.drawable.profile);
+
+                            }
+                        }
+                    }
+                });
+
+             /*   Games.getPlayersClient(getApplicationContext(),
+                        mAccount).getCurrentPlayerId()
+                        .addOnSuccessListener(new OnSuccessListener<String>() {
+                            @Override
+                            public void onSuccess(String s) {
+                                Toast.makeText(getApplicationContext(),"SUCCESS",Toast.LENGTH_LONG).show();
+
+                                for (Player p : players) {
+
+                                    if (p.getplayerId() == s) {
+
+                                        playerPartyViewModel.setCurrentPlayer(p);
+                                    }
+                                }
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(getApplicationContext(),"FALLO",Toast.LENGTH_LONG).show();
+                    }
+                }).addOnCompleteListener(new OnCompleteListener<String>() {
+                    @Override
+                    public void onComplete(@NonNull Task<String> task) {
+
+                        Toast.makeText(getApplicationContext(),"COMPLETADO",Toast.LENGTH_LONG).show();
+
+                    }
+                });*/
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (ClassNotFoundException e) {
